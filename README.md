@@ -1,0 +1,1 @@
+My own little password manager, I have a couple of ideas which i´ve never seen anyone include in a password manager. And in this project I will try to code all of them 
