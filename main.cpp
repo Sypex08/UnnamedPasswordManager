@@ -7,7 +7,6 @@
 #include <thread>
 #include <stdexcept>
 #include <sstream>
-//TODO if master pw isnt set create variable in json
 using namespace std;
 using json = nlohmann::json;
 
@@ -43,7 +42,7 @@ void from_json(const json& j, Entry& e) {
 
 
 int main() {
-
+    int index = 1;
     string answer;
     int answer1;
     string URL, username, password;
@@ -105,6 +104,7 @@ int main() {
         switch (answer1) {
 
             case 1: {
+                RunLoop = true; //festlegen das der while loop ausgeführt wird, falls weg = infinite loop
                 // Passwort eingeben
                 prntmenu("Website URL:");
                 cin >> URL;
@@ -190,6 +190,68 @@ int main() {
                         }
                         prntmenu("Select an Entry:\n\n");
                         // TODO i= options, dynamicly choose entry
+                        for (auto& e : entries) {
+
+                            cout << index <<"."+e.jsonURL << "\n";
+                            index++;
+                        }
+                        cout << "Select an Entry:\n\n";
+                        cin >> answer1;
+                        if (answer1 >= 1 || answer1 <= entries.size()) {
+                            Entry& e = entries[answer1 -1];
+
+                            cout << "\nYou selected:\n";
+                            cout << "1.URL: " << e.jsonURL << "\n";
+                            cout << "2.Username: " << e.jsonUsername << "\n";
+                            cout << "3.Password: " << e.jsonPassword << "\n";
+                            cout << "Which information would you like to edit?\n\n";
+                            cin >> answer1;
+                            switch (answer1) {
+                                case 1: {
+                                    cout << "Please enter the new URL:\n\n";
+                                    cin >> e.jsonURL;
+                                    cout << "URL Saved!\n\n";
+                                    jFile["Entries"].clear();
+                                    for (auto& entry : entries) {
+                                        jFile["Entries"].push_back(entry);
+                                    }
+                                    ofstream out("../../data.json");
+                                    out << jFile.dump(4);
+                                    out.close();
+                                    continue;
+                                }
+                                case 2: {
+                                    cout << "Please enter the new Username:\n\n";
+                                    cin >> e.jsonUsername;
+                                    cout << "Username Saved!\n\n";
+                                    jFile["Entries"].clear();
+                                    for (auto& entry : entries) {
+                                        jFile["Entries"].push_back(entry);
+                                    }
+                                    ofstream out("../../data.json");
+                                    out << jFile.dump(4);
+                                    out.close();
+                                    continue;
+                                }
+                                case 3: {
+                                    cout << "Please enter the new Password:\n\n";
+                                    cin >> e.jsonPassword;
+                                    jFile["Entries"].clear();
+                                    for (auto& entry : entries) {
+                                        jFile["Entries"].push_back(entry);
+                                    }
+                                    ofstream out("../../data.json");
+                                    out << jFile.dump(4);
+                                    out.close();
+                                    cout << "Password Saved!\n\n";
+
+
+                                    continue;
+                                }
+                            }
+                        }
+                        else
+                            cout << "Invalid input.\n\n";
 
                     }
                     else if (answer == "3") {
