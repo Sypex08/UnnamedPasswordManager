@@ -9,7 +9,6 @@
 #include <sstream>
 using namespace std;
 using json = nlohmann::json;
-//TODO bug when on option select typing a string
 void prntmenu(string option1, string option2 = "", string option3 = "", string option4 = "", string text1 = "")
 {
     if (option1 != "") option1 += "\n";
@@ -96,162 +95,106 @@ int main() {
                 entries.push_back(item.get<Entry>());
             }
         }
-
-        prntmenu("1.Add Password", "2.Show Passwords", "3.Close", "", "Choose an option:");
-
-        cin >> answer1;
-
-        switch (answer1) {
-
-            case 1: {
-                RunLoop = true; //festlegen das der while loop ausgeführt wird, falls weg = infinite loop
-                // Passwort eingeben
-                prntmenu("Website URL:");
-                cin >> URL;
-                prntmenu("Username:");
-                cin >> username;
-                prntmenu("Password:");
-                cin >> password;
-
-                while (RunLoop) {
-                    prntmenu("Are these Informations correct?:",
-                             "URL: " + URL,
-                             "Username: " + username,
-                             "Password: " + password,
-                             "");
-
-                    cout << "Please type Yes or No:\n> ";
-                    cin >> answer;
-                    transform(answer.begin(), answer.end(), answer.begin(), ::tolower);
-
-                    if (answer == "yes") {
-                        Entry newEntry{URL, username, password};
-
-                        jFile["Entries"].push_back(newEntry);
-
-                        ofstream out("../../data.json");
-                        out << jFile.dump(4);
-                        out.close();
-
-                        prntmenu("Password Saved!\n", "1.Return to menu", "2.Quit", "", "Please Choose an Option");
-
-                        cin >> answer;
-                        switch (answer1) {
-                            case 1: {
-                                RunLoop = false;
-                                continue;
-                            }
-                            case 2: {
-                                return 0;
-                            }
-                        }
-
-
-                    }
-                    else if (answer == "no") {
-                        RunLoop = false;
-                        continue;
-                    }
-                    else {
-                        cout << "Invalid input.\n\n";
-                    }
-                    break;
-
-                }
-                break;
+        while (RunLoop) {
+            RunLoop = false;
+            prntmenu("1.Add Password", "2.Show Passwords", "3.Close", "", "Choose an option:");
+            if (!(cin >> answer1)) {
+                cout << "Invalid Input!\n\n";
+                cin.clear(); // Fehlerzustand löschen
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Müll entfernen
+                RunLoop = true;
+                continue;
             }
 
-            case 2: {
-                cout << "\n >>>>> STORED PASSWORDS <<<<< \n";
+            if (answer1 == 0) {
+                cout << "Invalid Input!\n\n";
+                RunLoop = true;
+                continue;
+            }
+            else
+            switch (answer1) {
 
-                if (entries.empty()) {
-                    cout << "No entries found!\n\n";
-                }
-                else {
-                    for (auto& e : entries) {
-                        cout << "--------------------\n";
-                        cout << "URL:\n"+e.jsonURL << "\n\n";
-                        cout << "Username:\n"+e.jsonUsername << "\n\n";
-                        cout << "Password:\n"+e.jsonPassword << "\n\n";
-                    }
+                case 1: {
+                    RunLoop = true; //festlegen das der while loop ausgeführt wird, falls weg = infinite loop
+                    prntmenu("Website URL:");
+                    cin >> URL;
+                    prntmenu("Username:");
+                    cin >> username;
+                    prntmenu("Password:");
+                    cin >> password;
 
-                    prntmenu("Please choose an option\n", "1.Return to menu", "2.Edit Passwords", "3.Delete Entry",   "4.Quit\nChoose an option:");
+                    while (RunLoop) {
+                        prntmenu("Are these Informations correct?:",
+                                 "URL: " + URL,
+                                 "Username: " + username,
+                                 "Password: " + password,
+                                 "");
 
-                    cin >> answer;
+                        cout << "Please type Yes or No:\n> ";
+                        cin >> answer;
+                        transform(answer.begin(), answer.end(), answer.begin(), ::tolower);
 
-                    if (answer == "1") {
+                        if (answer == "yes") {
+                            Entry newEntry{URL, username, password};
 
-                    }
-                    else if (answer == "2") {
-                        prntmenu("Select an Entry:\n\n");
-                        // TODO i= options, dynamicly choose entry
-                        index = 1;
-                        for (auto& e : entries) {
-                            cout << index <<"."+e.jsonURL << "\n";
-                            index++;
-                        }
-                        cout << "Select an Entry:\n\n";
-                        cin >> answer1;
-                        if (answer1 >= 1 || answer1 <= entries.size()) {
-                            Entry& e = entries[answer1 -1];
+                            jFile["Entries"].push_back(newEntry);
 
-                            cout << "\nYou selected:\n";
-                            cout << "1.URL: " << e.jsonURL << "\n";
-                            cout << "2.Username: " << e.jsonUsername << "\n";
-                            cout << "3.Password: " << e.jsonPassword << "\n";
-                            cout << "Which information would you like to edit?\n\n";
-                            cin >> answer1;
+                            ofstream out("../../data.json");
+                            out << jFile.dump(4);
+                            out.close();
+
+                            prntmenu("Password Saved!\n", "1.Return to menu", "2.Quit", "", "Please Choose an Option");
+
+                            cin >> answer;
                             switch (answer1) {
                                 case 1: {
-                                    cout << "Please enter the new URL:\n\n";
-                                    cin >> e.jsonURL;
-                                    cout << "URL Saved!\n\n";
-                                    jFile["Entries"].clear();
-                                    for (auto& entry : entries) {
-                                        jFile["Entries"].push_back(entry);
-                                    }
-                                    ofstream out("../../data.json");
-                                    out << jFile.dump(4);
-                                    out.close();
+                                    RunLoop = false;
                                     continue;
                                 }
                                 case 2: {
-                                    cout << "Please enter the new Username:\n\n";
-                                    cin >> e.jsonUsername;
-                                    cout << "Username Saved!\n\n";
-                                    jFile["Entries"].clear();
-                                    for (auto& entry : entries) {
-                                        jFile["Entries"].push_back(entry);
-                                    }
-                                    ofstream out("../../data.json");
-                                    out << jFile.dump(4);
-                                    out.close();
-                                    continue;
-                                }
-                                case 3: {
-                                    cout << "Please enter the new Password:\n\n";
-                                    cin >> e.jsonPassword;
-                                    jFile["Entries"].clear();
-                                    for (auto& entry : entries) {
-                                        jFile["Entries"].push_back(entry);
-                                    }
-                                    ofstream out("../../data.json");
-                                    out << jFile.dump(4);
-                                    out.close();
-                                    cout << "Password Saved!\n\n";
-
-
-                                    continue;
+                                    return 0;
                                 }
                             }
+
+
                         }
-                        else
+                        else if (answer == "no") {
+                            RunLoop = false;
+                            continue;
+                        }
+                        else {
                             cout << "Invalid input.\n\n";
                         }
-                    else if (answer == "3") {
-                        RunLoop = true;
-                        while (RunLoop) {
-                           index = 1;
+                        break;
+
+                    }
+                    break;
+                }
+
+                case 2: {
+                    cout << "\n >>>>> STORED PASSWORDS <<<<< \n";
+
+                    if (entries.empty()) {
+                        cout << "No entries found!\n\n";
+                    }
+                    else {
+                        for (auto& e : entries) {
+                            cout << "--------------------\n";
+                            cout << "URL:\n"+e.jsonURL << "\n\n";
+                            cout << "Username:\n"+e.jsonUsername << "\n\n";
+                            cout << "Password:\n"+e.jsonPassword << "\n\n";
+                        }
+
+                        prntmenu("Please choose an option\n", "1.Return to menu", "2.Edit Passwords", "3.Delete Entry",   "4.Quit\nChoose an option:");
+
+                        cin >> answer;
+
+                        if (answer == "1") {
+
+                        }
+                        else if (answer == "2") {
+                            prntmenu("Select an Entry:\n\n");
+                            index = 1;
                             for (auto& e : entries) {
                                 cout << index <<"."+e.jsonURL << "\n";
                                 index++;
@@ -260,18 +203,18 @@ int main() {
                             cin >> answer1;
                             if (answer1 >= 1 || answer1 <= entries.size()) {
                                 Entry& e = entries[answer1 -1];
-                                RunLoop = true;
-                                while (RunLoop) {
-                                    cout << "\nYou selected:\n";
-                                    cout << "URL: " << e.jsonURL << "\n";
-                                    cout << "Username: " << e.jsonUsername << "\n";
-                                    cout << "Password: " << e.jsonPassword << "\n";
-                                    cout << "Are you sure you want to delete the entry? 1.Yes 2.No\n\n";
-                                    cin >> answer;
-                                    if (answer == "yes" || answer == "1") {
-                                        RunLoop = false;
-                                        //delete entry
-                                        entries.erase(entries.begin() + (answer1 - 1));
+
+                                cout << "\nYou selected:\n";
+                                cout << "1.URL: " << e.jsonURL << "\n";
+                                cout << "2.Username: " << e.jsonUsername << "\n";
+                                cout << "3.Password: " << e.jsonPassword << "\n";
+                                cout << "Which information would you like to edit?\n\n";
+                                cin >> answer1;
+                                switch (answer1) {
+                                    case 1: {
+                                        cout << "Please enter the new URL:\n\n";
+                                        cin >> e.jsonURL;
+                                        cout << "URL Saved!\n\n";
                                         jFile["Entries"].clear();
                                         for (auto& entry : entries) {
                                             jFile["Entries"].push_back(entry);
@@ -279,36 +222,102 @@ int main() {
                                         ofstream out("../../data.json");
                                         out << jFile.dump(4);
                                         out.close();
-                                        cout << "Entry successfully deleted!\n\n";
-                                        break;
+                                        continue;
                                     }
-                                    else if (answer == "no" || answer == "2") {
-                                        RunLoop = false;
-                                        break;
+                                    case 2: {
+                                        cout << "Please enter the new Username:\n\n";
+                                        cin >> e.jsonUsername;
+                                        cout << "Username Saved!\n\n";
+                                        jFile["Entries"].clear();
+                                        for (auto& entry : entries) {
+                                            jFile["Entries"].push_back(entry);
+                                        }
+                                        ofstream out("../../data.json");
+                                        out << jFile.dump(4);
+                                        out.close();
+                                        continue;
                                     }
-                                    else {
-                                        cout << "Invalid input.\n\n";
-                                        RunLoop = true;
+                                    case 3: {
+                                        cout << "Please enter the new Password:\n\n";
+                                        cin >> e.jsonPassword;
+                                        jFile["Entries"].clear();
+                                        for (auto& entry : entries) {
+                                            jFile["Entries"].push_back(entry);
+                                        }
+                                        ofstream out("../../data.json");
+                                        out << jFile.dump(4);
+                                        out.close();
+                                        cout << "Password Saved!\n\n";
+                                        continue;
                                     }
                                 }
                             }
-                            else if (answer1 <= 1 || answer1 >= entrysize) { //TODO doesnt execute = Fatal error
+                            else
                                 cout << "Invalid input.\n\n";
-                                RunLoop = true;
+                            }
+                        else if (answer == "3") {
+                            RunLoop = true;
+                            while (RunLoop) {
+                               index = 1;
+                                for (auto& e : entries) {
+                                    cout << index <<"."+e.jsonURL << "\n";
+                                    index++;
+                                }
+                                cout << "Select an Entry:\n\n";
+                                cin >> answer1;
+                                entrysize = entries.size();
+                                if (answer1 >= 1 && answer1 <= entries.size()) {
+                                    Entry& e = entries[answer1 -1];
+                                    RunLoop = true;
+                                    while (RunLoop) {
+                                        cout << "\nYou selected:\n";
+                                        cout << "URL: " << e.jsonURL << "\n";
+                                        cout << "Username: " << e.jsonUsername << "\n";
+                                        cout << "Password: " << e.jsonPassword << "\n";
+                                        cout << "Are you sure you want to delete the entry? 1.Yes 2.No\n\n";
+                                        cin >> answer;
+                                        if (answer == "yes" || answer == "1") {
+                                            RunLoop = false;
+                                            //delete entry
+                                            entries.erase(entries.begin() + (answer1 - 1));
+                                            jFile["Entries"].clear();
+                                            for (auto& entry : entries) {
+                                                jFile["Entries"].push_back(entry);
+                                            }
+                                            ofstream out("../../data.json");
+                                            out << jFile.dump(4);
+                                            out.close();
+                                            cout << "Entry successfully deleted!\n\n";
+                                            break;
+                                        }
+                                        else if (answer == "no" || answer == "2") {
+                                            RunLoop = false;
+                                            break;
+                                        }
+                                        else {
+                                            cout << "Invalid input.\n\n";
+                                            RunLoop = true;
+                                        }
+                                    }
+                                }
+                                else if (answer1 < 1 && answer1 > entrysize) {
+
+                                    cout << "Invalid input.\n\n";
+                                    RunLoop = true;
+                                }
+
+
                             }
 
-
                         }
+                        else if (answer == "4") {
+                            return 0;
+                        }
+                        else
+                            cout << "Invalid input.\n\n";
 
                     }
-                    else if (answer == "4") {
-                        return 0;
-                    }
-                    else
-                        cout << "Invalid input.\n\n";
-
-                }
-                break;
+                    break;
 
 
             }
@@ -317,6 +326,8 @@ int main() {
                 cout << "Closing...\n";
                 return 0;
         }
+        }
+
     } while (true);
 
 
